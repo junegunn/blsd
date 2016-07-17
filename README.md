@@ -10,11 +10,11 @@ Usage
 blsd [DIRS...]
 ```
 
-Installation
+Build
 ------------
 
 ```sh
-go get -u github.com/junegunn/blsd
+make
 ```
 
 Using it with fzf
