@@ -9,22 +9,20 @@ import (
 	"github.com/libgit2/git2go"
 )
 
-var blacklist map[string]bool
-
-func init() {
-	blacklist = make(map[string]bool)
-	// Deal with it
-	for _, name := range []string{".git", ".svn", ".hg"} {
-		blacklist[name] = true
-	}
+type entry struct {
+	path string
+	repo *git.Repository
 }
 
-func ignore(name string, repo *git.Repository) bool {
-	_, contained := blacklist[name]
-	if contained {
-		return true
-	} else if repo != nil {
-		abs, err := filepath.Abs(name)
+var references map[*git.Repository]int
+
+func init() {
+	references = make(map[*git.Repository]int)
+}
+
+func ignore(path string, repo *git.Repository) bool {
+	if repo != nil {
+		abs, err := filepath.Abs(path)
 		if err != nil {
 			return false
 		}
@@ -56,14 +54,21 @@ func isDir(name string) bool {
 	return fi.Mode().IsDir()
 }
 
-func bfsd(queue []string) []string {
-	newQueue := []string{}
-	for _, dir := range queue {
-		repo, err := git.OpenRepository(dir)
-		ignored := ignore(dir, repo)
-		if err == nil {
-			defer repo.Free()
+func bfsd(queue []entry) []entry {
+	newQueue := []entry{}
+	for _, e := range queue {
+		dir := e.path
+		repo := e.repo
+		if repo == nil {
+			r, err := git.OpenRepository(dir)
+			if err == nil {
+				repo = r
+				references[repo] = 1
+			}
+		} else {
+			references[repo] -= 1
 		}
+		ignored := ignore(dir, repo)
 		if ignored {
 			continue
 		}
@@ -80,27 +85,34 @@ func bfsd(queue []string) []string {
 		}
 		f.Close()
 
+		fmt.Println(dir)
+
 		for _, fi := range fis {
 			name := fi.Name()
 			path := path.Join(dir, name)
-			if fi.Mode().IsDir() && !ignore(path, repo) {
-				fmt.Println(path)
-				newQueue = append(newQueue, path)
+			if fi.Mode().IsDir() {
+				if repo != nil {
+					references[repo] += 1
+				}
+				newQueue = append(newQueue, entry{path, repo})
 			}
+		}
+		if repo != nil && references[repo] == 1 {
+			delete(references, repo)
+			repo.Free()
 		}
 	}
 	return newQueue
 }
 
 func main() {
-	var queue []string
+	var queue []entry
 	if len(os.Args) == 1 {
-		queue = []string{"."}
+		queue = []entry{entry{".", nil}}
 	} else {
 		for _, name := range os.Args[1:] {
 			if isDir(name) {
-				fmt.Println(name)
-				queue = append(queue, name)
+				queue = append(queue, entry{name, nil})
 			}
 		}
 	}
