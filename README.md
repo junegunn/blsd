@@ -10,8 +10,15 @@ Usage
 blsd [DIRS...]
 ```
 
+Install
+-------
+
+```sh
+bash <(curl -fL https://raw.githubusercontent.com/junegunn/blsd/master/install)
+```
+
 Build
-------------
+-----
 
 ```sh
 make
