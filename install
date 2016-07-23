@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -eu
+
+SRC=/tmp/blsd
+
+cleanup() {
+  rm -rf $SRC
+}
+
+trap cleanup EXIT SIGINT SIGTERM
+
+git clone --depth 1 https://github.com/junegunn/blsd.git $SRC
+cd $SRC
+make
+
+cd -
+cp -v $SRC/blsd .
