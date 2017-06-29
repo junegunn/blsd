@@ -3,7 +3,7 @@ GOPATH  := $(ROOTDIR)/gopath
 export GOPATH
 
 blsd: git2go blsd.go
-	go build -ldflags -w
+	go build -ldflags -w -o $@
 
 $(GOPATH):
 	mkdir -p $@
