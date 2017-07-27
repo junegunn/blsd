@@ -26,6 +26,10 @@ func ignore(path string, repo *git.Repository) bool {
 		if err != nil {
 			return false
 		}
+		abs, err = filepath.EvalSymlinks(abs)
+		if err != nil {
+			return false
+		}
 		base := filepath.Clean(repo.Path() + "..")
 		if abs == base {
 			return false
