@@ -1,6 +1,7 @@
 ROOTDIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 GOPATH  := $(ROOTDIR)/gopath
-export GOPATH
+GO111MODULE := auto
+export GOPATH GO111MODULE
 
 blsd: git2go blsd.go
 	go build -ldflags -w -o $@
