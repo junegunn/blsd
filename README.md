@@ -20,7 +20,7 @@ bash <(curl -fL https://raw.githubusercontent.com/junegunn/blsd/master/install)
 Or, you can use Homebrew to build blsd:
 
 ```sh
-brew install --HEAD https://raw.githubusercontent.com/junegunn/blsd/master/blsd.rb
+brew install --HEAD junegunn/tap/blsd
 ```
 
 Build
